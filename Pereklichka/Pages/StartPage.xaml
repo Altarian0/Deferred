@@ -1,0 +1,64 @@
+﻿<Page x:Class="Pereklichka.Pages.StartPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Pereklichka.Pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="StartPage">
+
+    <Grid Background="White">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="519*"/>
+            <ColumnDefinition Width="281*"/>
+        </Grid.ColumnDefinitions>
+        <ListBox ScrollViewer.CanContentScroll="False" x:Name="DeferredListBox" Margin="16,39,15,110" Grid.Column="1">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" TextAlignment="Center" HorizontalAlignment="Center" Text="{Binding Group.Name}" Height="30" Width="70" FontSize="18"/>
+                        <TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" TextAlignment="Left" HorizontalAlignment="Center" Text="{Binding DeferredTimeStr}" Margin="5" Height="50" Width="auto" FontSize="16"/>
+                        <TextBlock Grid.Column="1" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Center" TextAlignment="Left" HorizontalAlignment="Left" Text="{Binding SendEmail}" Margin="5,0,0,0" Height="20" Width="auto" FontSize="14"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <TextBlock HorizontalAlignment="Left" Margin="16,10,0,0" TextWrapping="Wrap" Text="Отложенные рассылки" VerticalAlignment="Top" RenderTransformOrigin="0.143,1.5" Width="250" Height="23" FontSize="14" Grid.Column="1"/>
+        <TabControl Margin="10,10,11,65">
+            <TabItem Header="ИС-31">
+                <Grid>
+                    <DataGrid AutoGenerateColumns="False" x:Name="IS31Data">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Name}" Header="Имя" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding Lastname}" Header="Фамилия" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding Email}" Header="Почта" Width="150"/>
+                            <DataGridTemplateColumn Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button x:Name="EditButton" Content="Изменить" Margin="5" Click="EditButton_Click"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Button x:Name="AddMail" Content="Добавить рассылку" Grid.Column="1" Margin="16,0,147,65" Height="26" VerticalAlignment="Bottom" Click="AddMail_Click"/>
+        <Button x:Name="AddUser" Content="Добавить пользователя" Margin="10,0,348,25" Height="26" VerticalAlignment="Bottom" Click="AddUser_Click"/>
+        <Button x:Name="SendMail" Content="Отправить сейчас" Grid.Column="1" Margin="17,0,147,25" Height="26" VerticalAlignment="Bottom" Click="SendMail_Click"/>
+        <Button x:Name="DelBtn" Content="Удалить" Margin="383,0,11,25" Height="26" VerticalAlignment="Bottom" Click="DeleteButton_Click"/>
+        <Button x:Name="DeleteMail" Content="Удалить рассылку" Grid.Column="1" Margin="149,0,15,65" Height="26" VerticalAlignment="Bottom" Click="DeleteMail_Click"/>
+
+    </Grid>
+</Page>
