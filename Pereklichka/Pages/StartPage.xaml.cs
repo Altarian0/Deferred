@@ -60,7 +60,8 @@ namespace Pereklichka.Pages
 
                     using (MailMessage message = new MailMessage(from, to))
                     {
-                        using (SmtpClient client = new SmtpClient($"smtp.{user.Email.Split(new char[] { '@' } )[1]}", 587))
+                        string domen = user.Email.Split(new char[] { '@' })[1];
+                        using (SmtpClient client = new SmtpClient($"smtp."+ domen == "bk.ru" ? "mail.ru" : domen, 587))
                         {
                             message.Subject = "";
                             message.Body = user.Name + " " + user.Lastname;
