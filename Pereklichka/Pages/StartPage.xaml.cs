@@ -42,7 +42,7 @@ namespace Pereklichka.Pages
                 if (mail.DeferredTime <= DateTime.Now)
                 {
                     StartMailing(mail);
-                    DataHelper.GetContext().DeferredMailing.Remove(mail);
+                    mail.StatusId = 2;
                     DataHelper.GetContext().SaveChanges();
                     ReloadPage();
                 }
@@ -53,31 +53,36 @@ namespace Pereklichka.Pages
         {
             await Task.Run(() =>
             {
+                StringBuilder errors = new StringBuilder();
+                errors.AppendLine("Не удалось отправить письма со следующих адресов: ");
                 foreach (var user in DataHelper.GetContext().Users)
                 {
-                    MailAddress from = new MailAddress(user.Email, user.Name + " " + user.Lastname);
-                    MailAddress to = new MailAddress(mail.SendEmail, "test");
-
-                    using (MailMessage message = new MailMessage(from, to))
+                    try
                     {
-                        string domen = user.Email.Split(new char[] { '@' })[1];
-                        using (SmtpClient client = new SmtpClient($"smtp."+ domen == "bk.ru" ? "mail.ru" : domen, 587))
+                        MailAddress from = new MailAddress(user.Email, user.Name + " " + user.Lastname);
+                        MailAddress to = new MailAddress(mail.SendEmail, "test");
+                        using (MailMessage message = new MailMessage(from, to))
                         {
-                            message.Subject = "";
-                            message.Body = user.Name + " " + user.Lastname;
+                            string domen = user.Email.Split(new char[] { '@' })[1];
+                            using (SmtpClient client = new SmtpClient($"smtp." + domen, 587))
+                            {
+                                message.Subject = "";
+                                message.Body = user.Name + " " + user.Lastname;
 
-                            client.Credentials = new NetworkCredential(user.Email, user.Password);
-                            client.EnableSsl = true;
-                            try
-                            {
+                                client.Credentials = new NetworkCredential(user.Email, user.Password);
+                                client.EnableSsl = true;
                                 client.Send(message);
-                            }
-                            catch
-                            {
-                                Console.WriteLine($"Сообщения с почты помечаются как спам");
                             }
                         }
                     }
+                    catch
+                    {
+                        errors.AppendLine(user.Email);
+                    }
+                }
+                if (errors.Length > 0)
+                {
+                    MessageBox.Show(errors.ToString(), "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             });
         }
@@ -86,7 +91,7 @@ namespace Pereklichka.Pages
         {
             DataHelper.GetContext().ChangeTracker.Entries().ToList().ForEach(n => n.Reload());
             IS31Data.ItemsSource = DataHelper.GetContext().Users.Where(n => n.GroupId == 1).ToList();
-            DeferredListBox.ItemsSource = DataHelper.GetContext().DeferredMailing.Where(n => n.DeferredTime > DateTime.Now).ToList();
+            DeferredListBox.ItemsSource = DataHelper.GetContext().DeferredMailing.Where(n => n.DeferredTime > DateTime.Now && n.StatusId == 1).ToList();
         }
 
         private void AddUser_Click(object sender, RoutedEventArgs e)
@@ -108,8 +113,9 @@ namespace Pereklichka.Pages
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (IS31Data.SelectedItem != null)
             {
+
                 IEnumerable<Users> users = IS31Data.SelectedItems.Cast<Users>().ToList();
                 if (MessageBox.Show("Вы действительно хотите удалить эти элементы?", "Внимание", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                     DataHelper.GetContext().Users.RemoveRange(users);
@@ -124,20 +130,30 @@ namespace Pereklichka.Pages
 
                 }
             }
-            catch
+            else
             {
                 MessageBox.Show("Выберите элементы удаления!");
             }
+
         }
 
         private void SendMail_Click(object sender, RoutedEventArgs e)
         {
+
             if (DeferredListBox.SelectedItem is DeferredMailing mail)
-                StartMailing(mail);
+            {
+                if (MessageBox.Show("Вы действительно хотите разослать сообщения сейчас?", "Внимание",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    StartMailing(mail);
+                    mail.StatusId = 2;
+                    DataHelper.GetContext().SaveChanges();
+                }
+            }
             else
                 MessageBox.Show("Выберите рассылку!");
 
-
+            ReloadPage();
         }
 
         private void AddMail_Click(object sender, RoutedEventArgs e)
